@@ -23,6 +23,7 @@ public class StudyTimer : MonoBehaviour
     private bool _timerOn;
 
     private WaitForSeconds _delay;
+    
     private void Start()
     {
         _delay = new WaitForSeconds(_experienceUpdateFrequency);
