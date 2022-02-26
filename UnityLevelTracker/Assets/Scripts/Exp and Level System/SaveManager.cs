@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SaveManager
 {
-     private static SaveProgress _progress;
+    private static SaveProgress _progress;
     private static string _filePath;
 
     static public bool LOCK { get; private set; }
@@ -20,13 +20,13 @@ public class SaveManager
         if (LOCK) return;
 
         _progress.SavedLevel = LevelManager.CurrentLevel;
-        _progress.SavedExperience = ExperienceBar.CurrentExperience;
-        _progress.SavedFiveMinuteTimer = StudyTimer._5MinTimer;
-        _progress.SavedTenMinuteTimer = StudyTimer._10MinTimer;
-        _progress.SavedThirtyMinuteTimer = StudyTimer._30MinTimer;
-        
+        _progress.SavedExperience = ExperienceBar.Instance.CurrentExperience;
+        _progress.SavedFiveMinuteTimer = StudyTimer.FiveMinTimer;
+        _progress.SavedTenMinuteTimer = StudyTimer.TenMinTimer;
+        _progress.SavedThirtyMinuteTimer = StudyTimer.ThirtyMinTimer;
+
         string jsonSaveFile = JsonUtility.ToJson(_progress, true);
-        
+
         File.WriteAllText(_filePath, jsonSaveFile);
 
         Debug.Log("SaveManager: Save() - Path: " + _filePath);
@@ -59,12 +59,12 @@ public class SaveManager
             ExperienceBar.LoadProgressFromSaveFile(_progress);
             LevelManager.LoadProgressFromSaveFile(_progress);
             StudyTimer.LoadProgressFromSaveFile(_progress);
-            
+
             LOCK = false; //makes it so you can save again
         }
     }
-    
-    static public void DeleteSave()
+
+    public static void DeleteSave()
     {
         if (File.Exists(_filePath))
         {
@@ -81,7 +81,7 @@ public class SaveManager
         // Lock the file to prevent any saving
         LOCK = true;
 
-       //Here is where you would RESET all values and states in various scripts
+        //Here is where you would RESET all variables in various scripts
 
         // Unlock the file
         LOCK = false;
