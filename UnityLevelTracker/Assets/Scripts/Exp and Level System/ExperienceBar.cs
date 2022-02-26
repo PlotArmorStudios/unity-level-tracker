@@ -1,3 +1,4 @@
+//#define DEBUG_LOG
 using System;
 using System.Collections;
 using TMPro;
@@ -7,22 +8,26 @@ using UnityEngine.UI;
 public class ExperienceBar : MonoBehaviour
 {
     [SerializeField] private Image _expImage;
+    [SerializeField] private Image _expGlowEffect;
     [SerializeField] private float _experienceFillSpeed = .1f;
+    
     [SerializeField] private TMP_Text _expText;
     [SerializeField] private TMP_Text _lvlUpText;
     [SerializeField] private AudioSource _lvlAudio;
     [SerializeField] private AudioSource _expAudio;
-    [SerializeField] private Image _expGlowEffect;
 
     public static ExperienceBar Instance;
+    
     public float CurrentExperience;
-
-    public float _MAXExperience = 1000f;
-    private float _experienceChange;
-    private float _carryOverExp;
-
+    public float MAXExperience = 1000f;
+    
     private Animator _expAnimator;
     private Button[] _buttons;
+
+    private float _experienceChange;
+    private float _carryOverExp;
+    private float _MINexperienceFillSpeed = .00067f;
+
 
     private void Awake()
     {
@@ -40,22 +45,32 @@ public class ExperienceBar : MonoBehaviour
 
     private void CalculateMaxExp()
     {
-        _MAXExperience = 1000f * Mathf.Pow(1.1f, LevelManager.CurrentLevel);
+        MAXExperience = 1000f * Mathf.Pow(1.1f, LevelManager.CurrentLevel);
     }
 
     private void CalculateFillSpeed(float gain)
     {
-        var gainPercentage = gain / _MAXExperience;
+        var gainPercentage = gain / MAXExperience;
 
+        //Scale fill speed for application start up
         if (gain == 0)
         {
             _experienceFillSpeed = .008f * Mathf.Pow(10, gainPercentage);
             return;
         }
 
+        //Scale fill speed to slow down the higher the percentage gain
         _experienceFillSpeed = (.008f / (gainPercentage * (gainPercentage * 70) * 10)) * Mathf.Pow(10, gainPercentage);
 
+        //Limit how slow exp fill speed can be
+        if (_experienceFillSpeed < _MINexperienceFillSpeed)
+            _experienceFillSpeed = _MINexperienceFillSpeed;
+
+        #region DebugLogs
+#if DEBUG_LOG
         Debug.Log("Fill speed: " + _experienceFillSpeed);
+#endif
+        #endregion
     }
 
     private void OnExperienceUpdate(float experienceGain = 0)
@@ -67,15 +82,11 @@ public class ExperienceBar : MonoBehaviour
         }
 
         CurrentExperience += experienceGain;
+
         CalculateMaxExp();
         CalculateFillSpeed(experienceGain);
 
         StartCoroutine(SmoothExperienceIncrease());
-
-        if (CurrentExperience >= _MAXExperience)
-        {
-            StartCoroutine(LevelUp());
-        }
     }
 
     private void AnimateExpText(float gain)
@@ -86,40 +97,38 @@ public class ExperienceBar : MonoBehaviour
 
     private IEnumerator LevelUp()
     {
-        yield return _expImage.fillAmount == 1f;
-
         LevelManager.CurrentLevel++;
         ExperienceGain.UpdateLevel();
 
-        _lvlAudio.Play();
-        _lvlUpText.GetComponent<Animator>().SetTrigger("Level Up");
-
+        PlayLevelUpEffects();
 
         foreach (var button in _buttons)
-        {
             button.interactable = false;
-        }
 
-        yield return new WaitForSeconds(.5f);
-        StartCoroutine(TriggerGlowEffect());
         CalculateCarryOverExp();
         CalculateMaxExp();
-        CurrentExperience = _carryOverExp;
 
-        yield return new WaitForSeconds(.2f);
+        yield return new WaitForSeconds(1.2f);
 
         _expImage.fillAmount = 0f;
 
         yield return new WaitForSeconds(.2f);
 
+        CalculateFillSpeed(_carryOverExp);
         StartCoroutine(SmoothExperienceIncrease());
 
-        yield return _expImage.fillAmount == CurrentExperience / _MAXExperience;
+        yield return _expImage.fillAmount == CurrentExperience / MAXExperience;
 
         foreach (var button in _buttons)
-        {
             button.interactable = true;
-        }
+    }
+
+    private void PlayLevelUpEffects()
+    {
+        _lvlAudio.Play();
+        _lvlUpText.GetComponent<Animator>().SetTrigger("Level Up");
+
+        StartCoroutine(TriggerGlowEffect());
     }
 
     private IEnumerator TriggerGlowEffect()
@@ -130,27 +139,34 @@ public class ExperienceBar : MonoBehaviour
         while (glowAlpha > 0)
         {
             _expGlowEffect.color = new Color(1, 1, 1, glowAlpha);
-            glowAlpha -= .001f;
+            glowAlpha -= .01f;
             yield return null;
         }
     }
 
     private void CalculateCarryOverExp()
     {
-        if (CurrentExperience > _MAXExperience)
-            _carryOverExp = CurrentExperience - _MAXExperience;
+        if (CurrentExperience > MAXExperience)
+            _carryOverExp = CurrentExperience - MAXExperience;
+
+        CurrentExperience = _carryOverExp;
+
         Debug.Log("Carry over exp is: " + _carryOverExp);
     }
 
     IEnumerator SmoothExperienceIncrease()
     {
-        while (_expImage.fillAmount != CurrentExperience / _MAXExperience)
+        while (_expImage.fillAmount != 1f)
         {
-            ///if (_expImage.fillAmount > CurrentExperience / _MAXExperience)
-            //  _expImage.fillAmount -= _experienceFillSpeed;
+            if (_expImage.fillAmount != CurrentExperience / MAXExperience)
+                if (_expImage.fillAmount < CurrentExperience / MAXExperience)
+                    _expImage.fillAmount += _experienceFillSpeed;
 
-            if (_expImage.fillAmount < CurrentExperience / _MAXExperience)
-                _expImage.fillAmount += _experienceFillSpeed;
+            if (_expImage.fillAmount == 1f)
+            {
+                StartCoroutine(LevelUp());
+                yield break;
+            }
 
             yield return null;
         }
