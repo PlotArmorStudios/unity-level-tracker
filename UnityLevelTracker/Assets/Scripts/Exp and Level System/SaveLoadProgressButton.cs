@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SaveProgressButton : MonoBehaviour
+public class SaveLoadProgressButton : MonoBehaviour
 {
     public void Save()
     {
