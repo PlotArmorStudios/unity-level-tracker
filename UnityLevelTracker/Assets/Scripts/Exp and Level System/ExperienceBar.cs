@@ -27,6 +27,7 @@ public class ExperienceBar : MonoBehaviour
     private float _experienceChange;
     private float _carryOverExp;
     private float _MINexperienceFillSpeed = .0013f;
+    private float _MAXexperienceFillSpeed = .01f;
 
     private void Awake()
     {
@@ -61,14 +62,19 @@ public class ExperienceBar : MonoBehaviour
         //Scale fill speed to slow down the higher the percentage gain
         _experienceFillSpeed = (.008f / (gainPercentage * (gainPercentage * 70) * 10)) * Mathf.Pow(10, gainPercentage);
 
-        //Limit how slow exp fill speed can be
+        //Limit how fast and slow exp fill speed can be
         if (_experienceFillSpeed < _MINexperienceFillSpeed)
             _experienceFillSpeed = _MINexperienceFillSpeed;
 
+        if (_experienceFillSpeed > gainPercentage)
+            _experienceFillSpeed = gainPercentage;
+
         #region DebugLogs
+
 #if DEBUG_LOG
         Debug.Log("Fill speed: " + _experienceFillSpeed);
 #endif
+
         #endregion
     }
 
@@ -82,7 +88,6 @@ public class ExperienceBar : MonoBehaviour
 
         CurrentExperience += experienceGain;
 
-        CalculateMaxExp();
         CalculateFillSpeed(experienceGain);
 
         StartCoroutine(SmoothExperienceIncrease());

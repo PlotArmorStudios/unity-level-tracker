@@ -17,7 +17,7 @@ public class StudyTimer : MonoBehaviour
     public static float FiveMinTimer { get; private set; }
     
     private float _5Minutes = 300f;
-    private float _10Minutes = 600f;
+    private float _10Minutes = 600;
     private float _30Minutes = 1800f;
 
     private bool _timerOn;
