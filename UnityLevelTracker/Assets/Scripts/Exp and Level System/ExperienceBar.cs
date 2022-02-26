@@ -26,8 +26,7 @@ public class ExperienceBar : MonoBehaviour
 
     private float _experienceChange;
     private float _carryOverExp;
-    private float _MINexperienceFillSpeed = .00067f;
-
+    private float _MINexperienceFillSpeed = .0013f;
 
     private void Awake()
     {
