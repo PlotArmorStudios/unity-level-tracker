@@ -154,8 +154,6 @@ public class ExperienceBar : MonoBehaviour
             _carryOverExp = CurrentExperience - MAXExperience;
 
         CurrentExperience = _carryOverExp;
-
-        Debug.Log("Carry over exp is: " + _carryOverExp);
     }
 
     IEnumerator SmoothExperienceIncrease()

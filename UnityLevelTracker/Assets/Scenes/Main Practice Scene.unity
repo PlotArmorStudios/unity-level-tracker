@@ -660,7 +660,7 @@ MonoBehaviour:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 2000
+          m_FloatArgument: 100000
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
@@ -3592,14 +3592,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _expImage: {fileID: 1466216375}
+  _expGlowEffect: {fileID: 1688364078}
   _experienceFillSpeed: 0.1
   _expText: {fileID: 2072609304}
   _lvlUpText: {fileID: 1406399799}
   _lvlAudio: {fileID: 1877498704}
   _expAudio: {fileID: 1381376321}
-  _expGlowEffect: {fileID: 1688364078}
   CurrentExperience: 0
-  _MAXExperience: 1000
+  MAXExperience: 1000
 --- !u!95 &1466216378
 Animator:
   serializedVersion: 3
